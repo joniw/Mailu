@@ -85,6 +85,22 @@ def owner(args, kwargs, model, key):
             or user.domain in flask_login.current_user.get_managed_domains()
         )
 
+@permissions_wrapper
+def bcc_owner(args, kwargs):
+    """ The view is only available to the bcc owner or manager of a domain.
+
+    A bcc_id must be provided. The access to the id is check against
+    the current user. Access is also granted if the user is the admin
+    of the domain of the bcc_id.
+    """
+    if 'bcc_id' in kwargs:
+        bcc = models.Bcc.query.get(kwargs['bcc_id'])
+        email = f'{bcc.localpart}@{bcc.domain}'
+        return (
+            email in flask_login.current_user.get_aliases()
+            or bcc.domain in flask_login.current_user.get_managed_domains()
+        )
+
 
 @permissions_wrapper
 def authenticated(args, kwargs):

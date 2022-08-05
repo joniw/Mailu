@@ -636,6 +636,40 @@ in clear-text regardless of the presence of the cache.
                 emails.extend(domain.aliases)
         return emails
 
+    def get_aliases(self, include_user_mail=True):
+        """ 
+            Returns list of aliases forwarding to the user.
+            Includes the email of the account itself if
+            include_user_mail is True (default). Resolves
+            aliases recursively.
+        """
+        aliases = [self.email] if include_user_mail else []
+        filter = Alias.destination.contains([self.email])
+        aliases.extend([alias.email for alias in Alias.query.filter(filter)])
+        additional_aliases = aliases
+        while len(additional_aliases) != 0:
+            filter_list = [Alias.destination.contains([email])
+                                for email in additional_aliases]
+            query_result = Alias.query.filter(sqlalchemy.or_(*filter_list))
+            additional_aliases = [alias.email for alias in query_result
+                                                if alias.email not in aliases]
+            aliases.extend(additional_aliases)
+        return aliases
+
+    def get_bccs(self):
+        """ 
+            Returns the list of bccs owned by the user.
+        """
+        aliases = self.get_aliases()
+        filter_list = [sqlalchemy.and_(Bcc.localpart == self.localpart,
+                                        Bcc.domain_name == self.domain.name)]
+        filter_list.extend([sqlalchemy.and_(
+                                Bcc.localpart == alias.split("@")[0],
+                                Bcc.domain_name == alias.split("@")[1])
+                            for alias in aliases])
+        bccs = Bcc.query.filter(sqlalchemy.or_(*filter_list))
+        return bccs
+
     def send_welcome(self):
         """ send welcome email to user """
         if app.config['WELCOME']:
@@ -796,7 +830,7 @@ class Bcc(Base):
 
     def __repr__(self):
         return (
-            f'<Bcc #{self.id}, {self.type}: {self.mail} -> {self.bcc}'
+            f'<Bcc #{self.id}, {self.type}: {self.localpart}@{self.domain_name} -> {self.bcc}'
         )
 
 
