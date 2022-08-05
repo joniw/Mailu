@@ -37,6 +37,19 @@ def postfix_alias_map(alias):
         return flask.jsonify(",".join(idna_encode(destinations)))
     return flask.abort(404)
 
+@internal.route("/postfix/aliasbcc/<path:aliasbcc>")
+def postfix_aliasbcc_map(aliasbcc):
+    bcc_domain = flask.current_app.config["BCC_ALIAS_DOMAIN"]
+    localpart, domain_name = models.Email.resolve_domain(aliasbcc)
+    if domain_name.endswith(bcc_domain):
+        domain_name, type = domain_name.replace("." + bcc_domain, "").rsplit(".", 1)
+        if type in ['sender', 'recipient']:
+            bccs = [bcc.bcc for bcc in models.Bcc.query.filter_by(domain_name=domain_name, localpart=localpart, type=type)]
+            if bccs:
+                return flask.jsonify(",".join(bccs))
+    return flask.abort(404)
+
+
 @internal.route("/postfix/transport/<path:email>")
 def postfix_transport(email):
     if email == '*' or re.match("(^|.*@)\[.*\]$", email):
@@ -180,3 +193,16 @@ def idna_encode(addresses):
         for (localpart, domain) in
         (address.rsplit("@", 1) for address in addresses)
     ]
+
+@internal.route("/postfix/sender/bcc/<path:address>", endpoint="sender")
+@internal.route("/postfix/recipient/bcc/<path:address>", endpoint="recipient")
+def postfix_sender_bcc(address):
+    """ Return a bcc address for the sender or recipient
+    """
+    bcc_domain = flask.current_app.config["BCC_ALIAS_DOMAIN"]
+    localpart, domain_name = models.Email.resolve_domain(address)
+    type = flask.request.endpoint.split(".")[-1]
+    bccs = [bcc.bcc for bcc in models.Bcc.query.filter_by(domain_name=domain_name, localpart=localpart, type=type)]
+    if bccs:
+        return flask.jsonify(localpart + "@" + ".".join([domain_name, type, bcc_domain]))
+    return flask.abort(404)

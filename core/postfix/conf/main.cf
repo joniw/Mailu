@@ -74,7 +74,7 @@ notify_classes = resource, software, delay
 # The alias map actually returns both aliases and local mailboxes, which is
 # required for reject_unlisted_sender to work properly
 virtual_alias_domains =
-virtual_alias_maps = ${podop}alias
+virtual_alias_maps = ${podop}alias, ${podop}aliasbcc
 virtual_mailbox_domains = ${podop}domain
 virtual_mailbox_maps = ${podop}mailbox
 
@@ -88,6 +88,10 @@ sender_canonical_maps = ${podop}sendermap
 sender_canonical_classes = envelope_sender
 recipient_canonical_maps = ${podop}recipientmap
 recipient_canonical_classes= envelope_recipient,header_recipient
+
+# Sender and recipient bcc maps
+sender_bcc_maps = ${podop}senderbcc
+recipient_bcc_maps = ${podop}recipientbcc
 
 # In order to prevent Postfix from running DNS query, enforce the use of the
 # native DNS stack, that will check /etc/hosts properly.

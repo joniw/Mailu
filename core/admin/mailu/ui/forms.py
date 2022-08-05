@@ -7,6 +7,7 @@ import flask_wtf
 import re
 
 LOCALPART_REGEX = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*$"
+DOMAINPART_REGEX = "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,63}$"
 
 class DestinationField(fields.SelectMultipleField):
     """ Allow for multiple emails selection from current user choices and
@@ -38,6 +39,7 @@ class MultipleEmailAddressesVerify(object):
 
     def __call__(self, form, field):
         pattern = re.compile(r'^([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{1,}\.)*([a-z]{1,})(,([_a-z0-9\-]+)(\.[_a-z0-9\-]+)*@([a-z0-9\-]{1,}\.)*([a-z]{2,}))*$')
+        pattern = re.compile(r'^{0}@{1}(,{0}@{1})*$'.format(LOCALPART_REGEX[1:-1], DOMAINPART_REGEX[1:-1]))
         if not pattern.match(field.data.replace(" ", "")):
             raise validators.ValidationError(self.message)
 
@@ -174,3 +176,19 @@ class AnnouncementForm(flask_wtf.FlaskForm):
     announcement_body = fields.StringField(_('Announcement body'),
         [validators.DataRequired()], widget=widgets.TextArea())
     submit = fields.SubmitField(_('Send'))
+
+
+class BccForm(flask_wtf.FlaskForm):
+    localpart = fields.SelectField(_('Address to BCC for'))
+    bcc = fields.StringField(_('BCC to'), [MultipleEmailAddressesVerify()])
+    type = fields.SelectField(_('Protocol'), choices=[
+       ('sender', 'BCC for sender address'),
+       ('recipient', 'BCC for recipient address')
+    ])
+    user_permissions = fields.SelectField(_('Protocol'), choices=[
+       ('hidden', 'Hidden for User'),
+       ('visible', 'Only visible for user'),
+       ('edit', 'Editable for User')
+    ])
+    comment = fields.StringField(_('Comment'))
+    submit = fields.SubmitField(_('Save'))

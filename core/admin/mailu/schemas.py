@@ -1092,6 +1092,16 @@ class BaseSchema(ma.SQLAlchemyAutoSchema, Storage):
 ### schema definitions ###
 
 @mapped
+class BccSchema(BaseSchema):
+    """ Marshmallow schema for BCC model """
+    class Meta:
+        """ Schema config """
+        model = models.Bcc
+        load_instance = True
+        sibling = True
+
+
+@mapped
 class DomainSchema(BaseSchema):
     """ Marshmallow schema for Domain model """
     class Meta:
@@ -1123,6 +1133,7 @@ class DomainSchema(BaseSchema):
     dns_spf = fields.String(dump_only=True)
     dns_dkim = fields.String(dump_only=True)
     dns_dmarc = fields.String(dump_only=True)
+    bccs = fields.Nested(BccSchema, many=True)
 
 
 @mapped

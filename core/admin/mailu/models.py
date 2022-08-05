@@ -776,6 +776,30 @@ class Fetch(Base):
         )
 
 
+class Bcc(Base):
+    """ A bcc entry is an address for which incoming (recipient) or
+        outgoing (sender) mails should be sent to as a blind carbon copy.
+    """
+
+    __tablename__ = 'bcc'
+
+    domain_name = db.Column(db.String(255), db.ForeignKey(Domain.name),
+        nullable=False)
+    domain = db.relationship(Domain,
+        backref=db.backref('bccs', cascade='all, delete-orphan'))
+    id = db.Column(db.Integer, primary_key=True)
+    localpart = db.Column(db.String(80), nullable=False)
+    bcc = db.Column(db.String(255), nullable=False)
+    type = db.Column(db.Enum('sender', 'recipient'), nullable=False)
+    user_permissions = db.Column(db.Enum('hidden', 'visible', 'edit'),
+        nullable=False)
+
+    def __repr__(self):
+        return (
+            f'<Bcc #{self.id}, {self.type}: {self.mail} -> {self.bcc}'
+        )
+
+
 class MailuConfig:
     """ Class which joins whole Mailu config for dumping
         and loading
@@ -982,3 +1006,4 @@ class MailuConfig:
     alias = MailuCollection(Alias)
     relay = MailuCollection(Relay)
     config = MailuCollection(Config)
+    bcc = MailuCollection(Bcc)

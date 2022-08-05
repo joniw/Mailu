@@ -1,0 +1,23 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}Create bcc for address{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ domain }}
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.card() %}
+<form class="form" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ macros.form_field(form.localpart, class_='mailselect') }}
+  {{ macros.form_field(form.bcc) }}
+  {{ macros.form_field(form.type) }}
+  {{ macros.form_field(form.user_permissions) }}
+  {{ macros.form_field(form.comment) }}
+  {{ macros.form_field(form.submit) }}
+</form>
+{%- endcall %}
+{%- endblock %}

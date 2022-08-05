@@ -1,0 +1,47 @@
+{%- extends "base.html" %}
+
+{%- block title %}
+{% trans %}BCC addresses{% endtrans %}
+{%- endblock %}
+
+{%- block subtitle %}
+{{ domain.name }}
+{%- endblock %}
+
+{%- block main_action %}
+<a class="btn btn-primary float-right" href="{{ url_for('.bcc_create', domain_name=domain.name) }}">{% trans %}Add a bcc address{% endtrans %}</a>
+{%- endblock %}
+
+{%- block content %}
+{%- call macros.table() %}
+<thead>
+  <tr>
+    <th>{% trans %}Actions{% endtrans %}</th>
+    <th>{% trans %}Email{% endtrans %}</th>
+    <th>{% trans %}BCC{% endtrans %}</th>
+    <th>{% trans %}Type{% endtrans %}</th>
+    <th>{% trans %}User permissions{% endtrans %}</th>
+    <th>{% trans %}Comment{% endtrans %}</th>
+    <th>{% trans %}Created{% endtrans %}</th>
+    <th>{% trans %}Last edit{% endtrans %}</th>
+  </tr>
+</thead>
+<tbody>
+  {%- for bcc in domain.bccs %}
+  <tr>
+    <td>
+      <a href="{{ url_for('.bcc_edit', bcc_id=bcc.id) }}" title="{% trans %}Edit{% endtrans %}"><i class="fa fa-pencil-alt"></i></a>&nbsp;
+      <a href="{{ url_for('.bcc_delete', bcc_id=bcc.id) }}" title="{% trans %}Delete{% endtrans %}"><i class="fa fa-trash"></i></a>
+    </td>
+    <td>{{ bcc.localpart }}@{{ bcc.domain_name }}</td>
+    <td>{{ bcc.bcc }}</td>
+    <td>{{ bcc.type }}</td>
+    <td>{{ bcc.user_permissions }}</td>
+    <td>{{ bcc.comment }}</td>
+    <td>{{ bcc.created_at | format_date }}</td>
+    <td>{{ bcc.updated_at | format_date }}</td>
+  </tr>
+  {%- endfor %}
+</tbody>
+{%- endcall %}
+{%- endblock %}

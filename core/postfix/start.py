@@ -22,11 +22,14 @@ def start_podop():
     run_server(0, "postfix", "/tmp/podop.socket", [
         ("transport", "url", url + "transport/§"),
         ("alias", "url", url + "alias/§"),
+        ("aliasbcc", "url", url + "aliasbcc/§"),
         ("dane", "url", url + "dane/§"),
         ("domain", "url", url + "domain/§"),
         ("mailbox", "url", url + "mailbox/§"),
         ("recipientmap", "url", url + "recipient/map/§"),
+        ("recipientbcc", "url", url + "recipient/bcc/§"),
         ("sendermap", "url", url + "sender/map/§"),
+        ("senderbcc", "url", url + "sender/bcc/§"),
         ("senderaccess", "url", url + "sender/access/§"),
         ("senderlogin", "url", url + "sender/login/§"),
         ("senderrate", "url", url + "sender/rate/§")
